@@ -11,7 +11,7 @@ Terraform Infrastructure as Code project for deploying the Remix Weather Applica
 | Name | GitHub |
 |------|--------|
 | Jingjing Duan | https://github.com/Jingjing-Duan |
-| Member 2 | |
+| Ruaa Thamer   | https://github.com/RuaaThamer    |
 | Member 3 | |
 | Member 4 | |
 
