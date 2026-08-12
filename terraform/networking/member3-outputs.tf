@@ -53,3 +53,44 @@ output "prod_redis_primary_access_key" {
   value       = module.redis_prod.primary_access_key
   sensitive   = true
 }
+
+
+output "test_aks_id" {
+  description = "Resource ID of the test AKS cluster"
+  value       = module.aks_test.id
+}
+
+output "test_aks_name" {
+  description = "Name of the test AKS cluster"
+  value       = module.aks_test.name
+}
+
+output "test_aks_resource_group_name" {
+  description = "Resource group containing the test AKS cluster"
+  value       = module.aks_test.resource_group_name
+}
+
+output "test_aks_node_resource_group" {
+  description = "Node resource group of the test AKS cluster"
+  value       = module.aks_test.node_resource_group
+}
+
+output "prod_aks_id" {
+  description = "Resource ID of the production AKS cluster"
+  value       = module.aks_prod.id
+}
+
+output "prod_aks_name" {
+  description = "Name of the production AKS cluster"
+  value       = module.aks_prod.name
+}
+
+output "prod_aks_resource_group_name" {
+  description = "Resource group containing the production AKS cluster"
+  value       = module.aks_prod.resource_group_name
+}
+
+output "prod_aks_node_resource_group" {
+  description = "Node resource group of the production AKS cluster"
+  value       = module.aks_prod.node_resource_group
+}
