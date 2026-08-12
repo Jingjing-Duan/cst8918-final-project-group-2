@@ -46,3 +46,19 @@ terraform.rc
 *.plan
 
 *.tfplan
+
+# Node dependencies
+node_modules/
+
+# Remix build/cache
+build/
+.cache/
+
+# Environment files / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
