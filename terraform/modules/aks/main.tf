@@ -14,6 +14,9 @@ resource "azurerm_role_assignment" "network_contributor" {
   skip_service_principal_aad_check = true
 }
 
+# GitHub-hosted runners use changing outbound IP addresses for the required
+# test and production deployment workflows.
+#tfsec:ignore:azure-container-limit-authorized-ips
 resource "azurerm_kubernetes_cluster" "this" {
   name                = var.cluster_name
   resource_group_name = var.resource_group_name
@@ -47,6 +50,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.aks.id]
   }
+  oms_agent {
+    log_analytics_workspace_id      = var.log_analytics_workspace_id
+    msi_auth_for_monitoring_enabled = true
+  }
+
 
   network_profile {
     network_plugin    = "azure"

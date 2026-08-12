@@ -94,3 +94,8 @@ output "prod_aks_node_resource_group" {
   description = "Node resource group of the production AKS cluster"
   value       = module.aks_prod.node_resource_group
 }
+
+output "aks_log_analytics_workspace_id" {
+  description = "ID of the shared Log Analytics workspace for AKS"
+  value       = azurerm_log_analytics_workspace.aks.id
+}

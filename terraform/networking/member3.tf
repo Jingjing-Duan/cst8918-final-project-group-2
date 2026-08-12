@@ -47,13 +47,28 @@ module "redis_prod" {
     Environment = "prod"
   })
 }
+
+resource "azurerm_log_analytics_workspace" "aks" {
+  name                = "cst8918-g2-aks-logs"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+
+  tags = {
+    Project   = "CST8918 Final Project"
+    ManagedBy = "Terraform"
+  }
+}
+
 module "aks_test" {
   source = "../modules/aks"
 
-  cluster_name        = "cst8918-g2-test-aks"
-  dns_prefix          = "cst8918-g2-test"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  cluster_name               = "cst8918-g2-test-aks"
+  dns_prefix                 = "cst8918-g2-test"
+  resource_group_name        = azurerm_resource_group.rg.name
+  location                   = azurerm_resource_group.rg.location
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.aks.id
 
   subnet_id = azurerm_subnet.subnets["test"].id
   acr_id    = module.acr.id
@@ -78,10 +93,11 @@ module "aks_test" {
 module "aks_prod" {
   source = "../modules/aks"
 
-  cluster_name        = "cst8918-g2-prod-aks"
-  dns_prefix          = "cst8918-g2-prod"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  cluster_name               = "cst8918-g2-prod-aks"
+  dns_prefix                 = "cst8918-g2-prod"
+  resource_group_name        = azurerm_resource_group.rg.name
+  location                   = azurerm_resource_group.rg.location
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.aks.id
 
   subnet_id = azurerm_subnet.subnets["prod"].id
   acr_id    = module.acr.id
