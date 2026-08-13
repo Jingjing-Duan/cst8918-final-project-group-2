@@ -32,6 +32,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   node_resource_group = "${var.cluster_name}-nodes-rg"
 
   role_based_access_control_enabled = true
+  oidc_issuer_enabled               = true
 
   default_node_pool {
     name                = "system"
@@ -50,11 +51,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.aks.id]
   }
+
   oms_agent {
     log_analytics_workspace_id      = var.log_analytics_workspace_id
     msi_auth_for_monitoring_enabled = true
   }
-
 
   network_profile {
     network_plugin    = "azure"
