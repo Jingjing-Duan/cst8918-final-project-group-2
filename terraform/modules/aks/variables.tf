@@ -29,15 +29,15 @@ variable "acr_id" {
 }
 
 variable "kubernetes_version" {
-  description = "Kubernetes version required by the project"
+  description = "Kubernetes version for the AKS cluster. Null uses the latest recommended version."
   type        = string
-  default     = "1.32"
+  default     = null
 }
 
 variable "sku_tier" {
   description = "AKS pricing tier"
   type        = string
-  default     = "Premium"
+  default     = "Free"
 
   validation {
     condition     = contains(["Free", "Standard", "Premium"], var.sku_tier)
@@ -48,7 +48,7 @@ variable "sku_tier" {
 variable "support_plan" {
   description = "AKS Kubernetes support plan"
   type        = string
-  default     = "AKSLongTermSupport"
+  default     = "KubernetesOfficial"
 
   validation {
     condition = contains(
@@ -62,7 +62,7 @@ variable "support_plan" {
 variable "vm_size" {
   description = "VM size used by the default node pool"
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_DC2as_v6"
 }
 
 variable "enable_auto_scaling" {

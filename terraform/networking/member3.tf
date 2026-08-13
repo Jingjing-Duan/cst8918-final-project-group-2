@@ -73,11 +73,6 @@ module "aks_test" {
   subnet_id = azurerm_subnet.subnets["test"].id
   acr_id    = module.acr.id
 
-  kubernetes_version = "1.32"
-  sku_tier           = "Premium"
-  support_plan       = "AKSLongTermSupport"
-  vm_size            = "Standard_B2s"
-
   enable_auto_scaling = false
   node_count          = 1
 
@@ -101,11 +96,6 @@ module "aks_prod" {
 
   subnet_id = azurerm_subnet.subnets["prod"].id
   acr_id    = module.acr.id
-
-  kubernetes_version = "1.32"
-  sku_tier           = "Premium"
-  support_plan       = "AKSLongTermSupport"
-  vm_size            = "Standard_B2s"
 
   enable_auto_scaling = true
   min_count           = 1
