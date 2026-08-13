@@ -1,6 +1,6 @@
 variable "location" {
   type    = string
-  default = "eastus" # Or any region preferred by your group
+  default = "canadacentral" # Or any region preferred by your group
 }
 
 variable "environment_slugs" {
