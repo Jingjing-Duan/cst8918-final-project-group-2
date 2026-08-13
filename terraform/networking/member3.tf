@@ -10,7 +10,7 @@ locals {
 module "acr" {
   source = "../modules/acr"
 
-  name                = "cst8918g2weatheracr"
+  name                = "cst8918g2weatheracr2"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
@@ -21,7 +21,7 @@ module "acr" {
 module "redis_test" {
   source = "../modules/redis"
 
-  name                = "cst8918-g2-weather-test-redis"
+  name                = "cst8918-g2-weather-test-redis2"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
@@ -36,7 +36,7 @@ module "redis_test" {
 module "redis_prod" {
   source = "../modules/redis"
 
-  name                = "cst8918-g2-weather-prod-redis"
+  name                = "cst8918-g2-weather-prod-redis2"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
@@ -49,7 +49,7 @@ module "redis_prod" {
 }
 
 resource "azurerm_log_analytics_workspace" "aks" {
-  name                = "cst8918-g2-aks-logs"
+  name                = "cst8918-g2-aks-logs2"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   sku                 = "PerGB2018"

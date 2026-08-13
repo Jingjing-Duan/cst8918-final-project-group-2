@@ -18,5 +18,5 @@ variable "resource_group_name" {
 variable "storage_account_name" {
   description = "Storage account for Terraform remote state"
   type        = string
-  default     = "cst8918g2tfstate"
+  default     = "cst8918g2tfstatestorage"
 }

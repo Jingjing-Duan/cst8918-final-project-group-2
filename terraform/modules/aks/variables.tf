@@ -62,7 +62,7 @@ variable "support_plan" {
 variable "vm_size" {
   description = "VM size used by the default node pool"
   type        = string
-  default     = "Standard_DC2as_v6"
+  default     = "Standard_D4ls_v6"
 }
 
 variable "enable_auto_scaling" {
