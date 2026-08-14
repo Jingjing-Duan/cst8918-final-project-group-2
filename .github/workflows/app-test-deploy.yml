@@ -1,0 +1,133 @@
+name: Weather App Test Deploy
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "weather-app/**"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-deploy-test:
+    name: Build and Deploy to Test
+    runs-on: ubuntu-latest
+
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_USE_OIDC: true
+      ARM_USE_AZUREAD: true
+      TF_DIR: terraform/networking
+      IMAGE_NAME: weather-app
+
+    steps:
+      - name: Checkout PR commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        working-directory: terraform/networking
+        run: terraform init -input=false -reconfigure
+
+      - name: Read infrastructure outputs
+        shell: bash
+        run: |
+          cd "$TF_DIR"
+
+          ACR_NAME="$(terraform output -raw acr_name)"
+          ACR_LOGIN_SERVER="$(terraform output -raw acr_login_server)"
+
+          AKS_NAME="$(terraform output -raw test_aks_name)"
+          AKS_RG="$(terraform output -raw test_aks_resource_group_name)"
+
+          REDIS_HOST="$(terraform output -raw test_redis_hostname)"
+          REDIS_PORT="$(terraform output -raw test_redis_ssl_port)"
+          REDIS_KEY="$(terraform output -raw test_redis_primary_access_key)"
+
+          echo "::add-mask::$REDIS_KEY"
+
+          ENCODED_REDIS_KEY="$(
+            printf '%s' "$REDIS_KEY" |
+            python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=""))'
+          )"
+
+          REDIS_URL="rediss://:${ENCODED_REDIS_KEY}@${REDIS_HOST}:${REDIS_PORT}"
+
+          echo "::add-mask::$REDIS_URL"
+
+          echo "ACR_NAME=$ACR_NAME" >> "$GITHUB_ENV"
+          echo "ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER" >> "$GITHUB_ENV"
+          echo "AKS_NAME=$AKS_NAME" >> "$GITHUB_ENV"
+          echo "AKS_RG=$AKS_RG" >> "$GITHUB_ENV"
+          echo "REDIS_URL=$REDIS_URL" >> "$GITHUB_ENV"
+
+      - name: Login to ACR
+        run: az acr login --name "$ACR_NAME"
+
+      - name: Build and push Docker image
+        shell: bash
+        run: |
+          IMAGE_TAG="${{ github.event.pull_request.head.sha }}"
+          IMAGE="${ACR_LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+          docker build \
+            -t "$IMAGE" \
+            weather-app
+
+          docker push "$IMAGE"
+
+      - name: Connect to test AKS
+        run: |
+          az aks get-credentials \
+            --resource-group "$AKS_RG" \
+            --name "$AKS_NAME" \
+            --overwrite-existing
+
+      - name: Create application secret
+        env:
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+        run: |
+          kubectl create secret generic weather-app-secrets \
+            --from-literal=weather-api-key="$WEATHER_API_KEY" \
+            --from-literal=redis-url="$REDIS_URL" \
+            --dry-run=client \
+            -o yaml | kubectl apply -f -
+
+      - name: Set test image
+        run: |
+          sed -i \
+            "s|image: .*|image: ${IMAGE}|" \
+            k8s/test/deployment.yaml
+
+      - name: Deploy to test AKS
+        run: |
+          kubectl apply -f k8s/test/
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status \
+            deployment/weather-app \
+            --timeout=5m
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods -o wide
+          kubectl get service weather-app-service

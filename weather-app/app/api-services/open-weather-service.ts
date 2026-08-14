@@ -24,3 +24,5 @@ export async function fetchWeatherData({
   await redis.set(queryString, data, { PX: TEN_MINUTES }) // The PX option sets the expiry time
   return JSON.parse(data)
 }
+
+//test comment to trigger the github workflow
