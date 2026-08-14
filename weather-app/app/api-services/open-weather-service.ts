@@ -25,4 +25,4 @@ export async function fetchWeatherData({
   return JSON.parse(data)
 }
 
-//test comment to trigger the github workflow
+//test 2 comment to trigger the github workflow
